@@ -33,24 +33,17 @@ modules are loaded in your code.
 
 my $wrapper_context = [];
 
-sub import {
-    _wrap_it('IPC::Run::run')   if $INC{'IPC/Run.pm'};
-    _wrap_it('IPC::Run3::run3') if $INC{'IPC/Run3.pm'};
-
-    unless (@$wrapper_context) {
-	Carp::carp "Use of IPC::Run::SafeHandles wihtout using IPC::Run or IPC::Run3 first";
-    }
-}
-
 sub _wrap_it {
     no strict 'refs';
     my $typeglob = shift;
+    my $caller = shift;
+
     my $original = *$typeglob{CODE};
     my $unwrap = 0;
 
     my $wrapper = sub {
 
-	goto &$original unless $ENV{FCGI_ROLE};
+        goto &$original unless $ENV{FCGI_ROLE};
 
 	my $stdout = IO::Handle->new;
 	$stdout->fdopen( 1, 'w' );
@@ -59,13 +52,26 @@ sub _wrap_it {
 	my $stderr = IO::Handle->new;
 	$stderr->fdopen( 2, 'w' );
 	local *STDERR = $stderr;
-	goto &$original;
+	$original->(@_);
     };
     no warnings 'redefine';
+    my $callerglob = $typeglob; $callerglob =~ s/IPC::Run3?/$caller/;
     *{$typeglob} = $wrapper;
+    *{$callerglob} = $wrapper;
     push @$wrapper_context,
 	bless(sub { no warnings 'redefine';
+                    *{$callerglob} = $original;
 		    *{$typeglob} = $original }, __PACKAGE__);
+}
+
+sub import {
+    my $caller = caller();
+    _wrap_it('IPC::Run::run', $caller)   if $INC{'IPC/Run.pm'};
+    _wrap_it('IPC::Run3::run3', $caller) if $INC{'IPC/Run3.pm'};
+
+    unless (@$wrapper_context) {
+	Carp::carp "Use of IPC::Run::SafeHandles wihtout using IPC::Run or IPC::Run3 first";
+    }
 }
 
 =head2 unimport
