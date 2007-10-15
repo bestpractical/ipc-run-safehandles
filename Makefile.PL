@@ -1,16 +1,12 @@
-use strict;
-use warnings;
-use ExtUtils::MakeMaker;
+#!/usr/bin/perl
+use inc::Module::Install;
+use 5.008;
 
-WriteMakefile(
-    NAME                => 'IPC::Run::SafeHandles',
-    AUTHOR              => 'Chia-liang Kao <clkao@bestpractical.com>',
-    VERSION_FROM        => 'lib/IPC/Run/SafeHandles.pm',
-    ABSTRACT_FROM       => 'lib/IPC/Run/SafeHandles.pm',
-    PL_FILES            => {},
-    PREREQ_PM => {
-        'Test::More' => 0,
-    },
-    dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'IPC-Run-SafeHandles-*' },
-);
+author      ('Chia-liang Kao <clkao@bestpractical.com>');
+license     ('perl');
+all_from    ('lib/IPC/Run/SafeHandles.pm');
+requires    ('Test::More');
+
+auto_install;
+WriteAll;
+
