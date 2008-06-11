@@ -10,7 +10,7 @@ IPC::Run::SafeHandles - Use IPC::Run and IPC::Run3 safely
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -70,7 +70,7 @@ sub import {
     _wrap_it('IPC::Run3::run3', $caller) if $INC{'IPC/Run3.pm'};
 
     unless (@$wrapper_context) {
-	Carp::carp "Use of IPC::Run::SafeHandles wihtout using IPC::Run or IPC::Run3 first";
+	Carp::carp "Use of IPC::Run::SafeHandles without using IPC::Run or IPC::Run3 first";
     }
 }
 
